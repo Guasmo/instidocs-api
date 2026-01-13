@@ -1,0 +1,36 @@
+services:
+  instidocs-api:
+    build: .
+    container_name: instidocs-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - ./images:/app/images
+    networks:
+      - instidocs-network
+
+  instidocs-db:
+    image: postgres:15-alpine
+    container_name: instidocs-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-instidocs}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - instidocs-network
+
+volumes:
+  postgres_data:
+
+networks:
+  instidocs-network:
+    driver: bridge
