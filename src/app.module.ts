@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
+import { DocumentModule } from './document/document.module';
 
 @Module({
   imports: [
@@ -21,14 +22,16 @@ import { CommonModule } from './common/common.module';
       },
       {
         rootPath: '/app/documents',
-        serveRoot: '/documents',
+        serveRoot: '/files',
       },
     ),
+
     UserModule,
     AuthModule,
     PrismaModule,
     UploadsModule,
     CommonModule,
+    DocumentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
