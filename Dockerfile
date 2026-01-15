@@ -36,10 +36,11 @@ RUN pnpm store prune
 
 RUN DATABASE_URL="postgresql://dummy:5432/db" pnpx prisma generate
 
-# Crear directorio para archivos subidos
-RUN mkdir -p /app/images && \
-    chown -R node:node /app/images && \
-    chmod -R 755 /app/images
+# Crear directorios para archivos subidos
+RUN mkdir -p /app/images /app/documents && \
+    chown -R node:node /app/images /app/documents && \
+    chmod -R 755 /app/images /app/documents
+
 
 USER node
 
