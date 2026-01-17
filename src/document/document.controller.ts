@@ -1,3 +1,4 @@
+// src/document/document.controller.ts
 import {
   Controller,
   Get,
@@ -15,23 +16,14 @@ import { DocumentService } from './document.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { Auth, GetUser } from 'src/auth/decorators';
-import { ConfigService } from '@nestjs/config';
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Controller('documents')
 export class DocumentController {
-  private readonly baseUrl: string;
-  private readonly uploadPath: string;
-
   constructor(
     private readonly documentService: DocumentService,
-    private readonly configService: ConfigService,
-  ) {
-    this.baseUrl =
-      this.configService.get('IMAGE_BASE_URL') || 'http://localhost:3000';
-    this.uploadPath = '/app/documents';
-  }
+    private readonly cloudinaryService: CloudinaryService,
+  ) { }
 
   @Auth()
   @Post('upload')
@@ -45,21 +37,14 @@ export class DocumentController {
         throw new BadRequestException('No se proporcionó ningún documento');
       }
 
-      // Verify file was saved
-      const filePath = path.join(this.uploadPath, file.filename);
-      if (!fs.existsSync(filePath)) {
-        throw new BadRequestException('Error al guardar el archivo');
-      }
+      // Subir a Cloudinary
+      const result = await this.cloudinaryService.uploadDocument(file);
 
-      // Generate public URL
-      const publicUrl = `${this.baseUrl}/files/${file.filename}`;
-
-
-      // Create document record in database
+      // Crear registro en base de datos
       const createDocumentDto: CreateDocumentDto = {
         name: file.originalname,
-        filename: file.filename,
-        url: publicUrl,
+        filename: result.public_id, // Guardar el public_id de Cloudinary
+        url: result.secure_url,
         mimetype: file.mimetype,
         size: file.size,
       };
@@ -115,14 +100,11 @@ export class DocumentController {
   async remove(@Param('id') id: string, @GetUser('id') userId: string) {
     const document = await this.documentService.remove(id, userId);
 
-    // Delete physical file
+    // Eliminar de Cloudinary usando el filename (que es el public_id)
     try {
-      const filePath = path.join(this.uploadPath, document.filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      await this.cloudinaryService.deleteFile(document.filename);
     } catch (error) {
-      console.error('Error deleting file:', error);
+      console.error('Error deleting file from Cloudinary:', error);
     }
 
     return {
@@ -132,5 +114,3 @@ export class DocumentController {
     };
   }
 }
-
-
