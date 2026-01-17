@@ -44,4 +44,4 @@ USER node
 EXPOSE 3000
 
 # Ejecutar migraciones y luego iniciar
-CMD ["sh", "-c", "pnpx prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "pnpx prisma migrate deploy && node dist/src/main"]
