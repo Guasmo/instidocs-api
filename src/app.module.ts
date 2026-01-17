@@ -9,6 +9,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
 import { DocumentModule } from './document/document.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { DocumentModule } from './document/document.module';
     UploadsModule,
     CommonModule,
     DocumentModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
