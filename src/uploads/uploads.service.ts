@@ -1,69 +1,44 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+// src/uploads/uploads.service.ts
+import { Injectable } from '@nestjs/common';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UploadsService {
-	private readonly baseUrl: string;
-	private readonly uploadPath: string;
-
-	constructor(private readonly configService: ConfigService) {
-		// URL base de tu servidor (configurable según ambiente)
-		this.baseUrl =
-			this.configService.get("IMAGE_BASE_URL") || "http://localhost:3000";
-		this.uploadPath = "/app/images";
-	}
+	constructor(private readonly cloudinaryService: CloudinaryService) { }
 
 	/**
-	 * Procesa el archivo subido y retorna la URL pública
+	 * Procesa el archivo subido y retorna la URL pública de Cloudinary
 	 */
-	processUploadedFile(file: Express.Multer.File): string {
+	async processUploadedFile(file: Express.Multer.File): Promise<string> {
 		if (!file) {
-			throw new Error("No se proporcionó ningún archivo");
+			throw new Error('No se proporcionó ningún archivo');
 		}
 
-		// Verificar que el archivo se guardó correctamente
-		const filePath = path.join(this.uploadPath, file.filename);
-		if (!fs.existsSync(filePath)) {
-			throw new Error("Error al guardar el archivo");
-		}
+		// Subir a Cloudinary
+		const result = await this.cloudinaryService.uploadImage(file);
 
-		// Generar URL pública
-		const publicUrl = `${this.baseUrl}/img/${file.filename}`;
-
-		return publicUrl;
+		// Retornar URL pública
+		return result.secure_url;
 	}
 
 	/**
-	 * Elimina una imagen del servidor
+	 * Elimina una imagen de Cloudinary
 	 */
-	deleteImage(filename: string): boolean {
+	async deleteImage(urlOrPublicId: string): Promise<boolean> {
 		try {
-			const filePath = path.join(this.uploadPath, filename);
-			if (fs.existsSync(filePath)) {
-				fs.unlinkSync(filePath);
-				return true;
-			}
-			return false;
+			const publicId = this.cloudinaryService.extractPublicId(urlOrPublicId);
+			await this.cloudinaryService.deleteFile(publicId);
+			return true;
 		} catch (error) {
-			console.error("Error al eliminar archivo:", error);
+			console.error('Error al eliminar archivo:', error);
 			return false;
 		}
 	}
 
 	/**
-	 * Extrae el nombre del archivo de una URL
+	 * Extrae el public_id de una URL
 	 */
-	extractFilenameFromUrl(url: string): string {
-		return path.basename(url);
-	}
-
-	/**
-	 * Verifica si una imagen existe en el servidor
-	 */
-	imageExists(filename: string): boolean {
-		const filePath = path.join(this.uploadPath, filename);
-		return fs.existsSync(filePath);
+	extractPublicIdFromUrl(url: string): string {
+		return this.cloudinaryService.extractPublicId(url);
 	}
 }

@@ -1,38 +1,36 @@
+// src/uploads/uploads.controller.ts
 import {
 	BadRequestException,
 	Controller,
 	Delete,
-	Param,
+	Body,
 	Post,
 	UploadedFile,
 	UseInterceptors,
-} from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { Auth } from "src/auth/decorators";
-import { UploadsService } from "./uploads.service";
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Auth } from 'src/auth/decorators';
+import { UploadsService } from './uploads.service';
 
-@Controller("upload")
+@Controller('upload')
 export class UploadsController {
-	constructor(
-		private readonly uploadService: UploadsService,
-	) { }
+	constructor(private readonly uploadService: UploadsService) { }
 
 	@Auth()
-	@Post("image")
-	@UseInterceptors(FileInterceptor("image"))
-	uploadImage(@UploadedFile() file: Express.Multer.File) {
+	@Post('image')
+	@UseInterceptors(FileInterceptor('image'))
+	async uploadImage(@UploadedFile() file: Express.Multer.File) {
 		try {
 			if (!file) {
-				throw new BadRequestException("No se proporcionó ninguna imagen");
+				throw new BadRequestException('No se proporcionó ninguna imagen');
 			}
 
-			const imageUrl = this.uploadService.processUploadedFile(file);
+			const imageUrl = await this.uploadService.processUploadedFile(file);
 
 			return {
 				success: true,
-				message: "Imagen subida exitosamente",
+				message: 'Imagen subida exitosamente',
 				data: {
-					filename: file.filename,
 					originalName: file.originalname,
 					size: file.size,
 					mimetype: file.mimetype,
@@ -45,18 +43,22 @@ export class UploadsController {
 	}
 
 	@Auth()
-	@Delete("image/:filename")
-	deleteImage(@Param("filename") filename: string) {
+	@Delete('image')
+	async deleteImage(@Body('url') url: string) {
 		try {
-			const deleted = this.uploadService.deleteImage(filename);
+			if (!url) {
+				throw new BadRequestException('URL es requerida');
+			}
+
+			const deleted = await this.uploadService.deleteImage(url);
 
 			if (!deleted) {
-				throw new BadRequestException("No se pudo eliminar la imagen");
+				throw new BadRequestException('No se pudo eliminar la imagen');
 			}
 
 			return {
 				success: true,
-				message: "Imagen eliminada exitosamente",
+				message: 'Imagen eliminada exitosamente',
 			};
 		} catch (error) {
 			throw new BadRequestException(error.message);
