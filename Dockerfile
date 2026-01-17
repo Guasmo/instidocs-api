@@ -36,14 +36,12 @@ RUN pnpm store prune
 
 RUN DATABASE_URL="postgresql://dummy:5432/db" pnpx prisma generate
 
-# Crear directorios para archivos subidos
-RUN mkdir -p /app/images /app/documents && \
-    chown -R node:node /app/images /app/documents && \
-    chmod -R 755 /app/images /app/documents
-
+# YA NO NECESITAS crear directorios locales
+# Los archivos se guardan en Cloudinary
 
 USER node
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "pnpm run start:prod"]
+# Ejecutar migraciones y luego iniciar
+CMD ["sh", "-c", "pnpx prisma migrate deploy && node dist/main"]
