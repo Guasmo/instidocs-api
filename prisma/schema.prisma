@@ -18,6 +18,7 @@ model User {
   password String
   fullName String?
   role     Role    @default(STUDENT)
+  isActive Boolean @default(true)
 
   // Relations
   documents Document[]
