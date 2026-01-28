@@ -11,7 +11,7 @@ COPY tsconfig*.json ./
 COPY prisma.config.ts ./
 COPY prisma ./prisma
 
-RUN DATABASE_URL="postgresql://dummy:5432/db" pnpx prisma generate
+RUN DATABASE_URL="postgresql://dummy:5432/db" pnpm dlx prisma generate
 COPY . .
 
 RUN pnpm run build
@@ -34,7 +34,7 @@ COPY --from=builder /app/prisma ./prisma
 RUN pnpm install --frozen-lockfile --prod
 RUN pnpm store prune
 
-RUN DATABASE_URL="postgresql://dummy:5432/db" pnpx prisma generate
+RUN DATABASE_URL="postgresql://dummy:5432/db" pnpm dlx prisma generate
 
 # YA NO NECESITAS crear directorios locales
 # Los archivos se guardan en Cloudinary
@@ -44,4 +44,4 @@ USER node
 EXPOSE 3000
 
 # Ejecutar migraciones y luego iniciar
-CMD ["sh", "-c", "pnpx prisma migrate deploy && node dist/src/main"]
+CMD ["sh", "-c", "pnpm dlx prisma migrate deploy && node dist/src/main"]
