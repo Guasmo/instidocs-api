@@ -17,14 +17,43 @@ model User {
   email    String  @unique
   password String
   fullName String?
+  role     Role    @default(STUDENT)
 
   // Relations
   documents Document[]
+
+  // Courses relations
+  enrolledCourses Course[] @relation("StudentCourses")
+  teachingCourses Course[] @relation("TeacherCourses")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+model Course {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+
+  teacherId String
+  teacher   User   @relation("TeacherCourses", fields: [teacherId], references: [id])
+
+  students User[] @relation("StudentCourses")
+
+  documents Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("courses")
 }
 
 model Document {
@@ -38,6 +67,9 @@ model Document {
   // Relations
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
