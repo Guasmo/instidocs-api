@@ -16,8 +16,28 @@ export class UserService {
       take: limit,
       skip: offset,
       where: {
-        role: Role.STUDENT
+        role: Role.STUDENT,
+        isActive: true
       }
+    });
+  }
+
+  async findAllUsers(paginationDto: PaginationDto, search?: string) {
+    const { limit = 100, offset = 0 } = paginationDto;
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { fullName: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    return this.prisma.user.findMany({
+      take: limit,
+      skip: offset,
+      where,
+      orderBy: { createdAt: 'desc' }
     });
   }
 
@@ -47,7 +67,11 @@ export class UserService {
   }
 
   async createTeacher(createUserDto: CreateUserDto) {
-    const { password, ...userData } = createUserDto;
+    return this.create({ ...createUserDto, role: Role.TEACHER });
+  }
+
+  async create(createUserDto: CreateUserDto) {
+    const { password, role, ...userData } = createUserDto;
 
     // Check if user exists
     const userExists = await this.prisma.user.findUnique({
@@ -64,7 +88,8 @@ export class UserService {
       data: {
         ...userData,
         password: hashedPassword,
-        role: Role.TEACHER,
+        role: role || Role.STUDENT,
+        isActive: true
       },
     });
   }
@@ -91,9 +116,24 @@ export class UserService {
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     await this.findOne(id);
+    const { password, ...rest } = updateUserDto;
+    const data: any = { ...rest };
+
+    if (password) {
+      data.password = await bcrypt.hash(password, 10);
+    }
+
     return this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data: data,
+    });
+  }
+
+  async softDelete(id: string) {
+    await this.findOne(id);
+    return this.prisma.user.update({
+      where: { id },
+      data: { isActive: false },
     });
   }
 
