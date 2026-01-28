@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
 import { DocumentModule } from './document/document.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     CommonModule,
     DocumentModule,
     CloudinaryModule,
+    CoursesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
