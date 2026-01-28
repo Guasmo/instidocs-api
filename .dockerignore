@@ -26,3 +26,5 @@ eslint.config.mjs
 .gitignore
 images
 test
+.agent
+prisma/seed.ts
