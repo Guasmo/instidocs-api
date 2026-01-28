@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsInt, Min } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, Min, IsOptional } from 'class-validator';
 
 export class CreateDocumentDto {
     @IsNotEmpty()
@@ -21,4 +21,8 @@ export class CreateDocumentDto {
     @IsInt()
     @Min(0)
     size: number;
+
+    @IsOptional()
+    @IsString()
+    courseId?: string;
 }
