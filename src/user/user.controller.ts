@@ -31,6 +31,18 @@ export class UserController {
     return this.userService.createTeacher(createUserDto);
   }
 
+  @Post('admin')
+  @RoleProtected(Role.ADMIN)
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
+  }
+
+  @Get('admin/all')
+  @RoleProtected(Role.ADMIN)
+  findAllUsers(@Query() paginationDto: PaginationDto, @Query('search') search: string) {
+    return this.userService.findAllUsers(paginationDto, search);
+  }
+
   @Get('teachers')
   @RoleProtected(Role.ADMIN)
   getTeachers() {
@@ -48,7 +60,8 @@ export class UserController {
   }
 
   @Delete(':id')
+  @RoleProtected(Role.ADMIN)
   remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+    return this.userService.softDelete(id);
   }
 }
