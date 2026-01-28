@@ -57,10 +57,16 @@ export class AuthService {
         email: true,
         password: true,
         id: true,
+        isActive: true, // Include isActive
       },
     });
 
     if (!user) {
+      throw new UnauthorizedException("Credentials are not valid");
+    }
+
+    // Check if user is active (default is true, so check for explicit false)
+    if (user.isActive === false) {
       throw new UnauthorizedException("Credentials are not valid");
     }
 
