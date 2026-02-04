@@ -45,21 +45,30 @@ export class CoursesController {
     @UploadedFile() file: Express.Multer.File,
     @GetUser() user: User
   ) {
-    if (!file) throw new BadRequestException('No file provided');
+    try {
+      if (!file) throw new BadRequestException('No file provided');
 
-    const result = await this.cloudinaryService.uploadDocument(file);
+      const result = await this.cloudinaryService.uploadDocument(file);
 
-    const createDocumentDto: CreateDocumentDto = {
-      name: file.originalname,
-      filename: result.public_id,
-      url: result.secure_url,
-      mimetype: file.mimetype,
-      size: file.size,
-      courseId: courseId
-    };
+      // Generar descripción automática
+      const description = await this.documentService.generateDescription(file);
 
-    return this.documentService.create(createDocumentDto, user.id);
+      const createDocumentDto: CreateDocumentDto = {
+        name: file.originalname,
+        filename: result.public_id,
+        url: result.secure_url,
+        mimetype: file.mimetype,
+        size: file.size,
+        description,
+        courseId: courseId
+      };
+
+      return this.documentService.create(createDocumentDto, user.id);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
+
 
   @Post(':id/students')
   @RoleProtected(Role.TEACHER, Role.ADMIN)

@@ -30,7 +30,8 @@ export class CloudinaryService {
           {
             folder,
             resource_type: resourceType,
-            public_id: file.originalname.split('.')[0],
+            public_id: file.originalname.split('.')[0].trim(),
+
             use_filename: true,
             unique_filename: true,
           },

@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUUID, IsEnum, IsInt, Min } from 'class-validator';
+import { Section } from '@prisma/client';
 
 export class CreateCourseDto {
     @IsString()
@@ -9,7 +10,23 @@ export class CreateCourseDto {
     @IsOptional()
     description?: string;
 
+    @IsEnum(Section)
+    @IsNotEmpty()
+    section: Section;
+
+    @IsInt()
+    @IsNotEmpty()
+    @Min(2000)
+    startYear: number;
+
+    @IsInt()
+    @IsNotEmpty()
+    @Min(2000)
+    endYear: number;
+
+
     @IsUUID()
     @IsNotEmpty()
     teacherId: string;
 }
+

@@ -30,7 +30,7 @@ export class DocumentController {
   @UseInterceptors(FileInterceptor('document'))
   async uploadDocument(
     @UploadedFile() file: Express.Multer.File,
-    @GetUser('id') userId: string,
+    @GetUser() user: any,
   ) {
     try {
       if (!file) {
@@ -40,6 +40,9 @@ export class DocumentController {
       // Subir a Cloudinary
       const result = await this.cloudinaryService.uploadDocument(file);
 
+      // Generar descripción automática
+      const description = await this.documentService.generateDescription(file);
+
       // Crear registro en base de datos
       const createDocumentDto: CreateDocumentDto = {
         name: file.originalname,
@@ -47,12 +50,15 @@ export class DocumentController {
         url: result.secure_url,
         mimetype: file.mimetype,
         size: file.size,
+        description,
       };
 
       const document = await this.documentService.create(
+
         createDocumentDto,
-        userId,
+        user.id,
       );
+
 
       return {
         success: true,
@@ -68,37 +74,41 @@ export class DocumentController {
   @Post()
   create(
     @Body() createDocumentDto: CreateDocumentDto,
-    @GetUser('id') userId: string,
+    @GetUser() user: any,
   ) {
-    return this.documentService.create(createDocumentDto, userId);
+    return this.documentService.create(createDocumentDto, user.id);
   }
+
 
   @Auth()
   @Get()
-  findAll(@GetUser('id') userId: string) {
-    return this.documentService.findAll(userId);
+  findAll(@GetUser() user: any) {
+    return this.documentService.findAll(user.id);
   }
+
 
   @Auth()
   @Get(':id')
-  findOne(@Param('id') id: string, @GetUser('id') userId: string) {
-    return this.documentService.findOne(id, userId);
+  findOne(@Param('id') id: string, @GetUser() user: any) {
+    return this.documentService.findOne(id, user);
   }
+
 
   @Auth()
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateDocumentDto: UpdateDocumentDto,
-    @GetUser('id') userId: string,
+    @GetUser() user: any,
   ) {
-    return this.documentService.update(id, updateDocumentDto, userId);
+    return this.documentService.update(id, updateDocumentDto, user);
   }
+
 
   @Auth()
   @Delete(':id')
-  async remove(@Param('id') id: string, @GetUser('id') userId: string) {
-    const document = await this.documentService.remove(id, userId);
+  async remove(@Param('id') id: string, @GetUser() user: any) {
+    const document = await this.documentService.remove(id, user);
 
     // Eliminar de Cloudinary usando el filename (que es el public_id)
     try {

@@ -39,10 +39,23 @@ enum Role {
   ADMIN
 }
 
+enum Section {
+  MATUTINA
+  VESPERTINA
+  NOCTURNA
+}
+
 model Course {
   id          String  @id @default(uuid())
   name        String
   description String?
+  section     Section @default(MATUTINA)
+  startYear   Int     @default(2025)
+  endYear     Int     @default(2026)
+
+
+
+
 
   teacherId String
   teacher   User   @relation("TeacherCourses", fields: [teacherId], references: [id])
@@ -58,12 +71,13 @@ model Course {
 }
 
 model Document {
-  id       String @id @default(uuid())
-  name     String // Original name
-  filename String // Stored name
-  url      String
-  mimetype String
-  size     Int
+  id          String  @id @default(uuid())
+  name        String // Original name
+  filename    String // Stored name
+  url         String
+  mimetype    String
+  size        Int
+  description String? @db.Text
 
   // Relations
   userId String
@@ -77,3 +91,4 @@ model Document {
 
   @@map("documents")
 }
+
