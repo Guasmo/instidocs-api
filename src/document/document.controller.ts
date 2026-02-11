@@ -30,6 +30,9 @@ export class DocumentController {
   @UseInterceptors(FileInterceptor('document'))
   async uploadDocument(
     @UploadedFile() file: Express.Multer.File,
+    @Body('name') name: string,
+    @Body('description') description: string,
+    @Body('authors') authors: string,
     @GetUser() user: any,
   ) {
     try {
@@ -37,20 +40,22 @@ export class DocumentController {
         throw new BadRequestException('No se proporcionó ningún documento');
       }
 
+      if (file.mimetype !== 'application/pdf') {
+        throw new BadRequestException('Solo se permiten archivos PDF');
+      }
+
       // Subir a Cloudinary
       const result = await this.cloudinaryService.uploadDocument(file);
 
-      // Generar descripción automática
-      const description = await this.documentService.generateDescription(file);
-
       // Crear registro en base de datos
       const createDocumentDto: CreateDocumentDto = {
-        name: file.originalname,
+        name: name || file.originalname,
         filename: result.public_id, // Guardar el public_id de Cloudinary
         url: result.secure_url,
         mimetype: file.mimetype,
         size: file.size,
-        description,
+        description: description || '',
+        authors: authors || '',
       };
 
       const document = await this.documentService.create(

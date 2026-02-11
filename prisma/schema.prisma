@@ -78,6 +78,7 @@ model Document {
   mimetype    String
   size        Int
   description String? @db.Text
+  authors     String? @db.Text
 
   // Relations
   userId String

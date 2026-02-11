@@ -28,6 +28,10 @@ export class CreateDocumentDto {
 
     @IsOptional()
     @IsString()
+    authors?: string;
+
+    @IsOptional()
+    @IsString()
     courseId?: string;
 }
 

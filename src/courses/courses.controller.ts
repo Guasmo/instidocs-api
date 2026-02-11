@@ -43,23 +43,25 @@ export class CoursesController {
   async uploadFile(
     @Param('id') courseId: string,
     @UploadedFile() file: Express.Multer.File,
+    @Body('name') name: string,
+    @Body('description') description: string,
+    @Body('authors') authors: string,
     @GetUser() user: User
   ) {
     try {
       if (!file) throw new BadRequestException('No file provided');
+      if (file.mimetype !== 'application/pdf') throw new BadRequestException('Only PDF files are allowed');
 
       const result = await this.cloudinaryService.uploadDocument(file);
 
-      // Generar descripción automática
-      const description = await this.documentService.generateDescription(file);
-
       const createDocumentDto: CreateDocumentDto = {
-        name: file.originalname,
+        name: name || file.originalname,
         filename: result.public_id,
         url: result.secure_url,
         mimetype: file.mimetype,
         size: file.size,
-        description,
+        description: description || '',
+        authors: authors || '',
         courseId: courseId
       };
 
