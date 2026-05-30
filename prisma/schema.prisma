@@ -53,10 +53,6 @@ model Course {
   startYear   Int     @default(2025)
   endYear     Int     @default(2026)
 
-
-
-
-
   teacherId String
   teacher   User   @relation("TeacherCourses", fields: [teacherId], references: [id])
 
@@ -74,10 +70,10 @@ model Document {
   id          String  @id @default(uuid())
   name        String // Original name
   filename    String // Stored name
+  description String? @db.Text
   url         String
   mimetype    String
   size        Int
-  description String? @db.Text
   authors     String? @db.Text
 
   // Relations
@@ -92,4 +88,3 @@ model Document {
 
   @@map("documents")
 }
-
