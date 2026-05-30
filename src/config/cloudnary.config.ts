@@ -12,5 +12,3 @@ export const CloudinaryProvider = {
         });
     },
 };
-
-export default cloudinary;
