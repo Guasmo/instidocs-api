@@ -33,5 +33,9 @@ export class CreateDocumentDto {
     @IsOptional()
     @IsString()
     courseId?: string;
+
+    @IsOptional()
+    @IsString()
+    description?: string;
 }
 

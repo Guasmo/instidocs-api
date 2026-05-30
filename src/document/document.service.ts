@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -63,6 +63,20 @@ export class DocumentService {
 
   async remove(id: string, user: any) {
     const document = await this.findOne(id, user);
+
+    if (!document) {
+      throw new NotFoundException(`Document with ID ${id} not found`);
+    }
+
+    // Check permissions: Owner OR Admin OR Teacher
+    // (Already checked in findOne, but keeping it explicit if needed)
+    const isOwner = document.userId === user.id;
+    const isAdmin = user.role === 'ADMIN';
+    const isTeacher = user.role === 'TEACHER';
+
+    if (!isOwner && !isAdmin && !isTeacher) {
+      throw new UnauthorizedException('No tienes permiso para eliminar este documento');
+    }
 
     await this.prisma.document.delete({
       where: { id },
