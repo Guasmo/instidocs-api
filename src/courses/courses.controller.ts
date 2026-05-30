@@ -43,10 +43,10 @@ export class CoursesController {
   async uploadFile(
     @Param('id') courseId: string,
     @UploadedFile() file: Express.Multer.File,
+    @GetUser() user: User,
     @Body('name') name: string,
     @Body('description') description: string,
     @Body('authors') authors: string,
-    @GetUser() user: User
   ) {
     try {
       if (!file) throw new BadRequestException('No file provided');

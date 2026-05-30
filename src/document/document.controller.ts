@@ -30,10 +30,10 @@ export class DocumentController {
   @UseInterceptors(FileInterceptor('document'))
   async uploadDocument(
     @UploadedFile() file: Express.Multer.File,
+    @GetUser('id') userId: string,
     @Body('name') name: string,
     @Body('description') description: string,
     @Body('authors') authors: string,
-    @GetUser() user: any,
   ) {
     try {
       if (!file) {
@@ -59,9 +59,8 @@ export class DocumentController {
       };
 
       const document = await this.documentService.create(
-
         createDocumentDto,
-        user.id,
+        userId,
       );
 
 
